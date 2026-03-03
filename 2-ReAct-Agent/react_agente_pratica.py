@@ -14,8 +14,8 @@ client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 chat_completion = client.chat.completions.create(
     messages=[
         {
-            "role": "user",
-            "content": "Explain the importance of fast language models",
+            "role": "Usuario",
+            "content": "Explique a importância de modelos de linguagem rápidos",
         }
     ],
     # Especificação do modelo a ser utilizado para a geração da resposta.
@@ -37,62 +37,60 @@ class Agent:
     # Método para processar uma mensagem do usuário, adicionar a mensagem à lista de mensagens, executar a solicitação de chat e retornar a resposta gerada pelo modelo.
     def __call__(self, message=""):
         if message:
-            self.messages.append({"role": "user", "content": message})
-        result = self.execute()
-        self.messages.append({"role": "assistant", "content": result})
-        return result
+            self.messages.append({"role": "Usuário", "content": message})
+        resultado = self.executar()
+        self.messages.append({"role": "Agente", "content": resultado})
+        return resultado
     
     # Método para executar a solicitação de chat utilizando o cliente Groq e retornar a resposta gerada pelo modelo.
-    def execute(self):
+    def executar(self):
         completion = client.chat.completions.create(
             messages= self.messages,
             model="llama-3.3-70b-versatile",
         )
         return completion.choices[0].message.content
 
-# Definição de uma mensagem de sistema para configurar o comportamento do agente, descrevendo o loop de Thought, Action, PAUSE, Observation e as ações disponíveis para o agente.        
+# Definição de um prompt de sistema para o agente, que orienta o comportamento do agente em um loop de pensamento, ação, pausa e observação, e define as ações disponíveis para o agente executar com base nas perguntas recebidas.       
 system_prompt = """
-You run in a loop of Thought, Action, PAUSE, Observation.
-At the end of the loop you output an Answer
-Use Thought to describe your thoughts about the question you have been asked.
-Use Action to run one of the actions available to you - then return PAUSE.
-Observation will be the result of running those actions.
+Você executa em um loop de Pensamento, Ação, PAUSA, Observação.
+No final do loop você fornece uma Resposta
+Use Pensamento para descrever seus pensamentos sobre a pergunta que lhe foi feita.
+Use Ação para executar uma das ações disponíveis para você - depois retorne PAUSA.
+Observação será o resultadoado da execução dessas ações.
 
-Your available actions are:
+Suas ações disponíveis são:
 
-calculate:
-e.g. calculate: 4 * 7 / 3
-Runs a calculation and returns the number - uses Python so be sure to use floating point syntax if necessary
+[nome_ação]
+e.g. obter_massa_planeta: [nome_planeta] - Retorna a massa do planeta especificado
+e.g. calcular: [operação matemática] - Retorna o resultadoado da operação matemática
+Descrição da ação
 
-get_planet_mass:
-e.g. get_planet_mass: Earth
-returns weight of the planet in kg
+Sessão de exemplo:
 
-Example session:
+Pergunta: Qual é a massa da Terra multiplicada por 2?
+Pensamento: Preciso encontrar a massa da Terra
+Ação: obter_massa_planeta: Terra
+PAUSA
 
-Question: What is the mass of Earth times 2?
-Thought: I need to find the mass of Earth
-Action: get_planet_mass: Earth
-PAUSE 
+Você será chamado novamente com isto:
 
-You will be called again with this:
+Observação: 5.972e24
 
-Observation: 5.972e24
+Pensamento: Preciso multiplicar isto por 2
+Ação: calcular: 5.972e24 * 2
+PAUSA
 
-Thought: I need to multiply this by 2
-Action: calculate: 5.972e24 * 2
-PAUSE
+Você será chamado novamente com isto: 
 
-You will be called again with this: 
+Observação: 1,1944×10e25
 
-Observation: 1,1944×10e25
+Se você tiver a resposta, forneça-a como Resposta.
 
-If you have the answer, output it as the Answer.
+Resposta: A massa da Terra multiplicada por 2 é 1,1944×10e25.
 
-Answer: The mass of Earth times 2 is 1,1944×10e25.
-
-Now it's your turn:
-""".strip() 
+Agora é sua vez:
+Pergunta: Qual é a massa da Terra multiplicada por 2?
+""".strip()
 
 # Função para realizar o calculo de uma operação matemática utilizando a função eval, permitindo que o agente execute cálculos dinâmicos com base nas ações solicitadas.
 def calculate(operation):
@@ -124,17 +122,17 @@ def get_planet_mass(planet) -> float:
 neil_tyson = Agent(client, system_prompt)
 
 # Exemplo de uso do agente para responder a uma pergunta sobre a massa da Terra multiplicada por 5, utilizando as ações definidas para obter a massa do planeta e realizar o cálculo necessário.
-result = neil_tyson("What is the mass of Earth times 5?")
-print(result)
+resultado = neil_tyson("What is the mass of Earth times 5?")
+print(resultado)
 
 # Imprime as mensagens trocadas entre o agente e o modelo de linguagem, mostrando o processo de pensamento, ações realizadas e observações feitas durante a interação.
 neil_tyson.messages
 
 # Exemplo de uso do agente para processar uma nova mensagem contendo a observação obtida, permitindo que o agente continue o processo de pensamento e ação com base na nova informação.
-result = neil_tyson()
-print(result)
+resultado = neil_tyson()
+print(resultado)
 
-# Exemplo de uso da função get_planet_mass para obter a massa da Terra e imprimir o resultado.
+# Exemplo de uso da função get_planet_mass para obter a massa da Terra e imprimir o resultadoado.
 obervation = get_planet_mass("Earth")
 print(obervation)
 
@@ -144,24 +142,24 @@ print(next_prompt)
 
 # Exemplo de uso do agente para processar a nova mensagem contendo a observação obtida, permitindo que o agente continue o processo de pensamento e ação com base na nova informação.
 next_prompt = f"obervation: {obervation}"
-result = neil_tyson(next_prompt)
-print(result)
+resultado = neil_tyson(next_prompt)
+print(resultado)
 
 # Imprime as mensagens trocadas entre o agente e o modelo de linguagem, mostrando o processo de pensamento, ações realizadas e observações feitas durante a interação.
 neil_tyson.messages
 
 # Exemplo de uso do agente para processar uma nova mensagem contendo a observação obtida, permitindo que o agente continue o processo de pensamento e ação com base na nova informação.
-result = neil_tyson()
-print(result)
+resultado = neil_tyson()
+print(resultado)
 
-# Exemplo de uso da função calculate para realizar uma operação matemática e imprimir o resultado.
+# Exemplo de uso da função calculate para realizar uma operação matemática e imprimir o resultadoado.
 obervation = calculate("3.285e23 * 5")
 print(obervation)
 
 # Exemplo de uso do agente para processar a nova mensagem contendo a observação obtida, permitindo que o agente continue o processo de pensamento e ação com base na nova informação.
 next_prompt = f"obervation: {obervation}"
-result = neil_tyson(next_prompt)
-print(result)
+resultado = neil_tyson(next_prompt)
+print(resultado)
 
 # Imprime as mensagens trocadas entre o agente e o modelo de linguagem, mostrando o processo de pensamento, ações realizadas e observações feitas durante a interação.
 neil_tyson.messages
@@ -183,18 +181,18 @@ def agent_loop(max_iterations, system, query):
     while i < max_iterations:
         i += 1
         # Envia o prompt atual ao agente e captura a resposta
-        result = agent(next_prompt)
-        print(result)
+        resultado = agent(next_prompt)
+        print(resultado)
         # Verifica se o agente pediu pausa e indicou uma ação a executar
-        if "PAUSE" in result and "Action" in result:
+        if "PAUSE" in resultado and "Action" in resultado:
             # Extrai o nome da ferramenta e o argumento da linha de ação
-            action = re.findall(r"Action: ([a-z_]+): (.*)", result, re.IGNORECASE)
+            action = re.findall(r"Action: ([a-z_]+): (.*)", resultado, re.IGNORECASE)
             chosen_tool = action[0][0]
             arg = action[0][1]
             # Se a ferramenta existir na lista permitida, executa e retorna observação
             if chosen_tool in tools:
-                result_tool = eval(f"{chosen_tool}('{arg}')")
-                next_prompt = f"Observation: {result_tool}"
+                resultado_tool = eval(f"{chosen_tool}('{arg}')")
+                next_prompt = f"Observation: {resultado_tool}"
             else:
                 # Caso a ferramenta não exista, informa erro ao agente
                 next_prompt = "Observation: Tool not found"
@@ -203,7 +201,7 @@ def agent_loop(max_iterations, system, query):
             print(next_prompt)
             continue
         # Verifica se o agente forneceu uma resposta final (Answer) e, se sim, encerra o loop
-        if "Answer:" in result:
+        if "Answer:" in resultado:
             break
 
 # Chama a função de loop do agente com um número máximo de iterações, o prompt de sistema definido e uma pergunta inicial sobre a massa da Terra multiplicada por 5.
