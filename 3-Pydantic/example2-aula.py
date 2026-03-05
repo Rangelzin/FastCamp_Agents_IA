@@ -1,3 +1,4 @@
+# Este exemplo demonstra o uso de validadores de campos e de modelo no Pydantic. Os validadores permitem aplicar regras de negócio personalizadas, como verificar o formato do nome, da senha e do papel do usuário, garantindo integridade nos dados antes de criar a instância.
 import enum
 import hashlib
 import re
@@ -17,6 +18,7 @@ VALID_PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$")
 VALID_NAME_REGEX = re.compile(r"^[a-zA-Z]{2,}$")
 
 
+# O IntFlag é uma classe de enumeração que permite criar conjuntos de flags usando operadores bit a bit. Aqui representamos os diferentes papéis que um usuário pode ter no sistema.
 class Role(enum.IntFlag):
     Author = 1
     Editor = 2
@@ -24,6 +26,7 @@ class Role(enum.IntFlag):
     SuperAdmin = 8
 
 
+# O BaseModel é a classe base do Pydantic para criar modelos de dados. Este modelo usa field_validator para validar campos individualmente e model_validator para validações que envolvem múltiplos campos ao mesmo tempo, como garantir que a senha não contenha o nome do usuário.
 class User(BaseModel):
     name: str = Field(examples=["Arjan"])
     email: EmailStr = Field(
@@ -73,6 +76,7 @@ class User(BaseModel):
         return v
 
 
+# A função validate é responsável por validar os dados de entrada usando o modelo User. Ela tenta criar uma instância do modelo com os dados fornecidos e, se ocorrer um erro de validação, ela captura a exceção e imprime os erros detalhados.
 def validate(data: dict[str, Any]) -> None:
     try:
         user = User.model_validate(data)
@@ -82,6 +86,7 @@ def validate(data: dict[str, Any]) -> None:
         print(e)
 
 
+# A função main é o ponto de entrada do programa. Ela define múltiplos conjuntos de dados de teste — válidos e inválidos — e chama a função validate para cada um, demonstrando como o Pydantic lida com diferentes cenários de validação.
 def main() -> None:
     test_data = dict(
         good_data={

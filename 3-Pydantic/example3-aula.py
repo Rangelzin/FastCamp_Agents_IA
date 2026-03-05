@@ -1,3 +1,4 @@
+# Este exemplo avança o uso do Pydantic demonstrando serialização customizada. Além dos validadores de campo e de modelo, são usados field_serializer e model_serializer para controlar como os dados são convertidos em dict ou JSON, incluindo exclusão de campos sensíveis e formatação personalizada.
 import enum
 import hashlib
 import re
@@ -17,6 +18,7 @@ VALID_PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$")
 VALID_NAME_REGEX = re.compile(r"^[a-zA-Z]{2,}$")
 
 
+# O IntFlag é uma classe de enumeração que permite criar conjuntos de flags usando operadores bit a bit. Aqui representamos os diferentes papéis que um usuário pode ter, incluindo o papel padrão User com valor 0.
 class Role(enum.IntFlag):
     User = 0
     Author = 1
@@ -25,6 +27,7 @@ class Role(enum.IntFlag):
     SuperAdmin = 8
 
 
+# O BaseModel é a classe base do Pydantic para criar modelos de dados. Este modelo combina validação de campos (field_validator), validação de modelo antes e depois da criação (model_validator), e serialização customizada (field_serializer e model_serializer) para controlar exatamente o que é exposto ao serializar para JSON.
 class User(BaseModel):
     name: str = Field(examples=["Example"])
     email: EmailStr = Field(
@@ -93,6 +96,7 @@ class User(BaseModel):
         return serializer(self)
 
 
+# A função main é o ponto de entrada do programa. Ela valida um usuário válido e exibe as diferentes formas de serialização disponíveis no Pydantic: como dict completo, como JSON padrão, como JSON com exclusão de campos, e como dict com todos os valores brutos.
 def main() -> None:
     data = {
         "name": "Arjan",

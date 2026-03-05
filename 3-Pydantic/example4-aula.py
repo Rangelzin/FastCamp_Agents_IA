@@ -1,3 +1,4 @@
+# Este exemplo demonstra a integração do Pydantic com o FastAPI para construção de APIs. O Pydantic é utilizado para validação automática dos dados de entrada e saída das rotas HTTP, enquanto o TestClient do FastAPI é usado para testar os endpoints sem precisar subir um servidor real.
 from datetime import datetime
 from typing import Optional
 from uuid import uuid4
@@ -9,6 +10,7 @@ from pydantic import BaseModel, EmailStr, Field, field_serializer, UUID4
 
 app = FastAPI()
 
+# O BaseModel é a classe base do Pydantic para criar modelos de dados. Este modelo configura `extra="forbid"` para rejeitar campos desconhecidos, utiliza UUID4 como identificador único gerado automaticamente, e define um serializer customizado para converter o UUID em string ao exportar para JSON.
 class User(BaseModel):
     model_config = {
         "extra": "forbid",
@@ -34,17 +36,20 @@ class User(BaseModel):
         return str(id)
 
 
+# O endpoint GET /users retorna a lista de todos os usuários cadastrados em memória. O FastAPI usa o response_model para serializar e validar automaticamente a resposta com base no modelo User.
 @app.get("/users", response_model=list[User])
 async def get_users() -> list[User]:
     return list(User.__users__)
 
 
+# O endpoint POST /users recebe os dados de um novo usuário no corpo da requisição, valida automaticamente via Pydantic e o armazena na lista em memória, retornando o usuário criado com seus campos gerados (id, signup_ts).
 @app.post("/users", response_model=User)
 async def create_user(user: User):
     User.__users__.append(user)
     return user
 
 
+# O endpoint GET /users/{user_id} busca um usuário pelo seu UUID. Se o usuário não for encontrado, retorna uma resposta JSON com status 404 e uma mensagem de erro.
 @app.get("/users/{user_id}", response_model=User)
 async def get_user(user_id: UUID4) -> User | JSONResponse:
     try:
@@ -53,6 +58,7 @@ async def get_user(user_id: UUID4) -> User | JSONResponse:
         return JSONResponse(status_code=404, content={"message": "User not found"})
 
 
+# A função main é o ponto de entrada do programa. Ela utiliza o TestClient do FastAPI para simular requisições HTTP aos endpoints, verificando criação de usuários, listagem, busca por ID e validação de dados inválidos, tudo sem necessidade de um servidor em execução.
 def main() -> None:
     with TestClient(app) as client:
         for i in range(5):
