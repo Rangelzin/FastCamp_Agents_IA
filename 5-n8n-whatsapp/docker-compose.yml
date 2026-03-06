@@ -1,0 +1,45 @@
+services:
+  n8n:
+    container_name: n8n-aula
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    volumes:
+      - ./n8n/:/home/node/.n8n
+    environment:
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+    restart: unless-stopped
+    networks:
+      - n8n-network
+  
+  waha:
+    container_name: waha-aula
+    image: devlikeapro/waha
+    ports:
+      - 127.0.0.1:3000:3000/tcp
+    environment:
+      - WHATSAPP_DEFAULT_ENGINE=NOWEB
+      - WHATSAPP_HOOK_EVENTS=message     
+      - WHATSAPP_HOOK_URL=http://host.docker.internal:5678/webhook/b32a221b-9382-4be9-933f-9c8cac5a5a2b/waha
+    volumes:
+      - ./waha/:/tmp/
+      - ./waha/media/:/app/.media/
+      - ./waha/sessions:/app/.sessions/
+    restart: always
+    networks:
+      - n8n-network
+    env_file:
+      - .env
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '10'
+
+networks:
+  n8n-network:
+    driver: bridge

@@ -1,1 +1,6 @@
+# Varaveis de ambiente
 .env
+
+# Pastas desnessárias
+node_modules
+tmp-*
