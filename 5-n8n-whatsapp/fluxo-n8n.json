@@ -1,0 +1,229 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "@devlikeapro/n8n-nodes-waha.wahaTrigger",
+      "typeVersion": 202502,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ed6c3773-51bb-4fbb-ad77-d1dc3e4c3811",
+      "name": "WAHA Trigger",
+      "webhookId": "b32a221b-9382-4be9-933f-9c8cac5a5a2b"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7aaf6aaa-b08e-4ec4-96f4-e7f30234f866",
+              "name": "session",
+              "value": "={{ $json.session }}",
+              "type": "string"
+            },
+            {
+              "id": "198f5dd8-d18a-41d5-bf45-a4a8e793e022",
+              "name": "from",
+              "value": "={{ $json.payload._data.key.remoteJidAlt }}",
+              "type": "string"
+            },
+            {
+              "id": "961bc2c0-16dd-4708-b730-70be68728857",
+              "name": "message",
+              "value": "={{ $json.payload.body }}",
+              "type": "string"
+            },
+            {
+              "id": "61a0620c-5dcf-41fc-bfd1-a5de6e7a91df",
+              "name": "id_message",
+              "value": "={{ $json.payload.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        16
+      ],
+      "id": "26211675-d921-43dc-9b83-a7772f8d9a4d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Edit Fields').item.json.session }}",
+        "chatId": "={{ $('Edit Fields').item.json.from }}",
+        "text": "=Resposta do Agente: {{ $json.output }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        864,
+        16
+      ],
+      "id": "d57ab471-041b-409b-896f-05f3d468e247",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "KjANAGGCjl52IPVq",
+          "name": "WAHA account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.session }}",
+        "contextWindowLength": 10
+      },
+      "id": "cecdccaa-c9d0-41b7-9abd-b7890689ec3c",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        560,
+        320
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Mensagem Recebida: {{ $json.message }}",
+        "options": {}
+      },
+      "id": "f9b5cabc-001e-40a0-a353-caa6918251ad",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        480,
+        16
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "maxTokensToSample": 8000,
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        432,
+        256
+      ],
+      "id": "30a6c3fb-be8e-4858-9873-ea0d6949ab78",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "LxVFC0qJ0cmY0CpS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "gl": "br"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        688,
+        224
+      ],
+      "id": "b92d69fc-868c-4338-9af3-7f82db54a77f",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "mjfuI1fxh6ZsmIBB",
+          "name": "SerpAPI account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "WAHA Trigger": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e2dbf3d98c1b93f3a2868967e5da56a695f62e997349a5a9a14bd76d6832778"
+  }
+}
