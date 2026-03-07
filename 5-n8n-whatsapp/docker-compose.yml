@@ -20,7 +20,7 @@ services:
     environment:
       - WHATSAPP_DEFAULT_ENGINE=NOWEB
       - WHATSAPP_HOOK_EVENTS=message     
-      - WHATSAPP_HOOK_URL=http://host.docker.internal:5678/webhook/b32a221b-9382-4be9-933f-9c8cac5a5a2b/waha
+      - WHATSAPP_HOOK_URL=http://n8n-aula:5678/webhook-test/b32a221b-9382-4be9-933f-9c8cac5a5a2b/waha
     volumes:
       - ./waha/:/tmp/
       - ./waha/media/:/app/.media/
