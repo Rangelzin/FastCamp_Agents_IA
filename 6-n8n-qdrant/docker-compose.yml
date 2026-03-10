@@ -42,6 +42,20 @@ services:
     networks:
       - n8n-network
   
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
 networks:
   n8n-network:
-    driver: bridge
+    driver: bridge  
+
+volumes:
+  ollama_data:
+    driver: local
+  

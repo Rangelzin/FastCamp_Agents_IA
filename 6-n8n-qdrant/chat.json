@@ -1,0 +1,224 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -304,
+        -160
+      ],
+      "id": "bbd9788d-e012-4993-9151-cb452d3ba642",
+      "name": "When chat message received",
+      "webhookId": "ee445fde-a792-41c1-b6fc-479d8f1ea85a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Mensagem do Usuário: {{ $json.chatInput }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -96,
+        -160
+      ],
+      "id": "b3fb7882-1dcc-41e0-bbe8-e0386286faad",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        32
+      ],
+      "id": "575ba066-9838-443a-949f-6bfcfd9ddf18",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "LxVFC0qJ0cmY0CpS",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        48
+      ],
+      "id": "6d9b6c51-4e73-4220-803d-e93719c43b8b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "The knowledge base to answer user questions about Elestio"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        48
+      ],
+      "id": "af9e54f2-1aa7-48bd-9afa-11d35c95d39e",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "id",
+          "value": "elestio_nomic_v1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        256
+      ],
+      "id": "7003d188-cbf5-4464-b59f-d41e968d2835",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "8VZ6jQdNbMbSuylo",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        432
+      ],
+      "id": "f7539b43-d498-4cf4-9777-53d294d100dc",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "ggsJMXXOdJ42exEu",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        224,
+        272
+      ],
+      "id": "2fb100f1-a9f4-4717-8e21-5a0edbbdf747",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "LxVFC0qJ0cmY0CpS",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e2dbf3d98c1b93f3a2868967e5da56a695f62e997349a5a9a14bd76d6832778"
+  }
+}
