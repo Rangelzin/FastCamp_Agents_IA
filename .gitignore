@@ -1,5 +1,6 @@
 # Varaveis de ambiente
 .env
+.venv/
 
 # Pastas desnessárias
 node_modules
