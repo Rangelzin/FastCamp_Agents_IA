@@ -1,3 +1,4 @@
+# Bbibliotecas e Configurações para o Agente
 import os
 import asyncio
 from typing import Dict
@@ -10,9 +11,11 @@ from dotenv import load_dotenv
 # 1. Setup Silencioso
 load_dotenv(override=True)
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "False"
+# Configurações de logging para reduzir verbosidade
 logging = __import__("logging")
 logging.basicConfig(level=logging.ERROR)
 
+# Definição dos Modelos (Usando modelos menores para testes rápidos)
 MODEL1 = "groq/llama-3.3-70b-versatile"
 MODEL2 = "gemma-3-27b-it"
 
@@ -40,6 +43,7 @@ git_agent = Agent(
     tools=[format_commit]
 )
 
+# O Tech Lead é o agente principal, delegando tarefas específicas para o git_agent e usando generate_makefile quando necessário.
 tech_lead = Agent(
     name="tech_lead",
     model=MODEL2,
@@ -54,21 +58,24 @@ async def main():
     await session_service.create_session(app_name="dev_app", user_id="user_dev", session_id="session_1")
     runner = Runner(agent=tech_lead, app_name="dev_app", session_service=session_service)
 
+    # Interface de Linha de Comando Simples
     print("\n" + "="*50)
     print("🚀 CLI Dev Assistant Iniciado (Digite 'sair' para fechar)")
     print("="*50)
 
+    # Loop de Interação
     while True:
         query = input("\n> ")
         if query.lower() in ['sair', 'exit', 'quit']:
             break
-            
+        # Criando o conteúdo da mensagem para o agente
         content = types.Content(role='user', parts=[types.Part(text=query)])
-        
+        # Executando o agente e aguardando a resposta final
         async for event in runner.run_async(user_id="user_dev", session_id="session_1", new_message=content):
             if event.is_final_response() and event.content:
                 print(f"\n🤖 {event.content.parts[0].text}")
                 break
 
+# Encerramento
 if __name__ == "__main__":
     asyncio.run(main())
