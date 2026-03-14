@@ -4,3 +4,5 @@
 
 # Pastas desnessárias
 node_modules
+.adk
+__pycache__
